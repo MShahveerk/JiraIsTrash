@@ -1,0 +1,28 @@
+name: Keep Forgeboard awake
+
+# Render free web services spin down after 15 minutes without traffic.
+# This pings the health endpoint every 10 minutes to keep the instance warm.
+# Add a repository variable named FORGEBOARD_URL, for example:
+#   https://forgeboard.onrender.com
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        env:
+          URL: ${{ vars.FORGEBOARD_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "Set the FORGEBOARD_URL repository variable first." >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            --retry 3 --retry-delay 10 --max-time 90 \
+            "${URL%/}/api/health"
+          echo
+          echo "Forgeboard is awake."

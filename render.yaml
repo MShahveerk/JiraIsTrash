@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: forgeboard
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Use a free Neon Postgres URL. Render's own free Postgres expires after
+      # 30 days; Neon does not.
+      - key: DATABASE_URL
+        sync: false
+      # Shared passcode required to open the app.
+      - key: APP_PASSCODE
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      # Start with an empty workspace instead of seeding the demo project.
+      - key: SEED_DEMO
+        value: "false"
